@@ -22,7 +22,7 @@ var mainState = {
 	},
 	upKey: null,
 	downKey: null,
-	speed: 100,
+	speed: 10,
 	drop: -100,
 	swim_speed: 4,
 	create: function () {
@@ -76,6 +76,8 @@ var mainState = {
 		// Call the 'restartGame' function
 		if(this.swim_speed > 4)
 			this.swim_speed --;
+		if(this.speed > 10)
+			this.speed--;
 		this.player.animations.currentAnim.speed = this.swim_speed;
 
 		game.physics.arcade.overlap(
@@ -92,7 +94,7 @@ var mainState = {
 		if (this.player.body.gravity.x == 0) {
 			this.player.body.gravity.x = this.drop;
 		}
-		this.speed += 1;
+		this.speed += 10;
 		this.player.body.velocity.x = this.speed;
 		if(this.swim_speed < 16){
 			this.swim_speed+=2;
@@ -184,18 +186,4 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	});
 
 }
-var resetEvent = function (key) {
-	$(document).trigger(
-		$.Event('keyup', {
-			which: key,
-			keyCode: key
-		})
-	);
-};
-var forward = function () {
-	$(document).trigger($.Event('keydown', {
-		which: 32,
-		keyCode: 32
-	}));
-};
 var game = new Phaser.Game(window.innerWidth, window.innerHeight);
