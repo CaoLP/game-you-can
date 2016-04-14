@@ -14,12 +14,26 @@ html, body {
     text-align: center;
     width: 100%;
 }
+#guide{
+    text-align: center;
+    background: black;
+    color: #fff;
+    padding: 0;
+    margin: 0;
+    border: none;
+    display: none;
+}
 #qrcode{
     position: absolute;
-    right: 25px;
-    top: 25px;
     background: #fff;
     padding: 10px;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
 }
 #qrcode img {
     width: 160px;
@@ -28,13 +42,31 @@ html, body {
 #controller{
     width: 100%;
     height:100%;
-    background: red;
+    background: #333945;
     position: relative;
 
 }
+#controller h1{
+    text-align: center;
+    color: #fff;
+    margin: 0;
+}
 #press-me{
-    width: 150px;
-    height:150px;
+    width: 250px;
+    height:250px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    -o-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border-radius: 200px;
+    background: transparent;
+}
+.gif{
+    width: 100%;
     position: absolute;
     top: 50%;
     left: 50%;

@@ -1,7 +1,7 @@
-var server = 'http://192.168.1.13:3250';
+var server = 'http://192.168.1.200:3250';
 
 var qrcode = new QRCode("qrcode");
-var roomURL = "http://192.168.1.13:3250/";
+var roomURL = "http://192.168.1.200:3250/";
 function makeCode(elText, gameCode) {
 	if (elText.length == 0) {
 		alert("Input a text");
@@ -56,6 +56,10 @@ var mainState = {
 		game.physics.arcade.enable(this.player);
 		game.physics.arcade.enable(this.crocodile);
 
+		this.speed = 10;
+		this.drop =  -100;
+		this.swim_speed = 4;
+
 		// Add gravity to the player to make it fall
 		this.player.body.gravity.x = 0;
 		var self = this;
@@ -65,9 +69,12 @@ var mainState = {
 			Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.add(this.run, this);
 		var FakeButton = document.getElementById('fake-btn');
-		FakeButton.addEventListener("click", function (event) {
+			var FakeButtonClone = FakeButton.cloneNode(true);
+		FakeButtonClone.addEventListener("click", function (event) {
 			self.run();
 		}, false);
+		FakeButton.parentNode.replaceChild(FakeButtonClone, FakeButton);
+
 	},
 
 	update: function () {
@@ -77,13 +84,16 @@ var mainState = {
 		if(this.swim_speed > 4)
 			this.swim_speed --;
 		if(this.speed > 10)
-			this.speed--;
+			this.speed-=2;
+		//if(this.speed < 10) this.speed = 10;
+
+
 		this.player.animations.currentAnim.speed = this.swim_speed;
 
-		game.physics.arcade.overlap(
-			this.player, this.crocodile, this.gameLose, null, this);
+		//game.physics.arcade.overlap(
+		//	this.player, this.crocodile, this.gameLose, null, this);
 
-		if (this.player.x < 0)
+		if (this.player.x < 90)
 			this.gameLose();
 		if (this.player.x > window.innerWidth) {
 			this.gameWin();
@@ -94,12 +104,13 @@ var mainState = {
 		if (this.player.body.gravity.x == 0) {
 			this.player.body.gravity.x = this.drop;
 		}
-		this.speed += 10;
+		this.speed += 20;
 		this.player.body.velocity.x = this.speed;
 		if(this.swim_speed < 16){
-			this.swim_speed+=2;
+			this.swim_speed += 2;
 			this.player.animations.currentAnim.speed = this.swim_speed;
 		}
+		console.log([this.speed,this.swim_speed]);
 	},
 	newGame: function () {
 		this.create();
@@ -108,6 +119,9 @@ var mainState = {
 // Restart the game
 	restartGame: function () {
 		// Start the 'main' state, which restarts the game
+		this.speed = 10;
+		this.drop =  -100;
+		this.swim_speed = 4;
 		game.state.start('main');
 	},
 	gameWin: function () {
@@ -119,7 +133,7 @@ var mainState = {
 			Phaser.Keyboard.SPACEBAR);
 		spaceKey.onDown.add(function () {
 			game.paused = false;
-			game.state.restart(true, true);
+			this.restartGame();
 		}, this);
 	},
 	gameLose: function () {
@@ -135,6 +149,7 @@ var mainState = {
 		}, this);
 	}
 };
+$('#guide').hide();
 // If client is an Android Phone
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 	$('#controller').show();
@@ -164,6 +179,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	});
 
 } else {
+	$('#guide').show();
 	var socket = io.connect(server);
 
 	// When initial welcome message, reply with 'game' device type
@@ -177,6 +193,8 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	});
 	socket.on("connected", function (data) {
 		$('#pc').show();
+		$('#guide').hide();
+		$('#qrcode').hide();
 		game.state.add('main', mainState, true);
 	});
 	// When the phone is touched, accelerate the vehicle
@@ -184,6 +202,5 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 		console.log(accelerate);
 		$("#fake-btn").click();
 	});
-
+	var game = new Phaser.Game(window.innerWidth, window.innerHeight);
 }
-var game = new Phaser.Game(window.innerWidth, window.innerHeight);
