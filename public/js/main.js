@@ -153,7 +153,7 @@ $('#guide').hide();
 // If client is an Android Phone
 if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 	$('#controller').show();
-	var gameCode = window.location.hash.substr(1);
+	var gameCode = window.location.hash.substr(1, 6);
 	var socket = io.connect(server);
 	var button;
 	// When server replies with initial welcome...

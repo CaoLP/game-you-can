@@ -35,13 +35,10 @@ io.sockets.on('connection', function(socket)
 {
 	// Confirm the connection
 	socket.emit("welcome", {});
-	console.log('welcome');
 
 	// Receive the client device type
 	socket.on("device", function(device)
 	{
-		console.log('device');
-		console.log(device);
 		// if client is a browser game
 		if(device.type == "game")
 		{
@@ -65,7 +62,6 @@ io.sockets.on('connection', function(socket)
 		// if client is a phone controller
 		else if(device.type == "controller")
 		{
-			console.log('controller');
 			// if game code is valid...
 			if(device.gameCode in socketCodes)
 			{
@@ -94,7 +90,6 @@ io.sockets.on('connection', function(socket)
 		var bAccelerate = data.accelerate;
 		if(socket.gameCode && socket.gameCode in socketCodes)
 		{
-			console.log(bAccelerate);
 			socketCodes[socket.gameCode].emit("accelerate",
 				bAccelerate);
 		}
