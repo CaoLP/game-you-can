@@ -2,6 +2,7 @@ html, body {
     margin: 0;
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 #mainCanvas {
@@ -52,10 +53,13 @@ html, body {
     margin: 0;
 }
 #press-me{
-    width: 250px;
-    height:250px;
+    width: 50px;
+    height: 50px;
+    /*width: 250px;*/
+    /*height:250px;*/
     position: absolute;
-    top: 50%;
+    top: 20%;
+    /*top: 50%;*/
     left: 50%;
     -webkit-transform: translate(-50%, -50%);
     -moz-transform: translate(-50%, -50%);

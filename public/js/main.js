@@ -11,6 +11,7 @@ function makeCode(elText, gameCode) {
 }
 var w_width = window.innerWidth;
 var w_height = window.innerHeight;
+var player_speed = 10;
 // Create our 'main' state that will contain the game
 var mainState = {
 	preload: function () {
@@ -56,7 +57,7 @@ var mainState = {
 		game.physics.arcade.enable(this.player);
 		game.physics.arcade.enable(this.crocodile);
 
-		this.speed = 10;
+		player_speed = 10;
 		this.drop =  -100;
 		this.swim_speed = 4;
 
@@ -83,9 +84,9 @@ var mainState = {
 		// Call the 'restartGame' function
 		if(this.swim_speed > 4)
 			this.swim_speed --;
-		if(this.speed > 10)
-			this.speed-=2;
-		//if(this.speed < 10) this.speed = 10;
+		if(player_speed > 10)
+			player_speed-=2;
+		//if(player_speed < 10) player_speed = 10;
 
 
 		this.player.animations.currentAnim.speed = this.swim_speed;
@@ -104,13 +105,13 @@ var mainState = {
 		if (this.player.body.gravity.x == 0) {
 			this.player.body.gravity.x = this.drop;
 		}
-		this.speed += 20;
-		this.player.body.velocity.x = this.speed;
+		//player_speed += player_speed*0.1;
+		this.player.body.velocity.x = player_speed;
 		if(this.swim_speed < 16){
 			this.swim_speed += 2;
 			this.player.animations.currentAnim.speed = this.swim_speed;
 		}
-		console.log([this.speed,this.swim_speed]);
+		console.log([player_speed,this.swim_speed]);
 	},
 	newGame: function () {
 		this.create();
@@ -119,7 +120,7 @@ var mainState = {
 // Restart the game
 	restartGame: function () {
 		// Start the 'main' state, which restarts the game
-		this.speed = 10;
+		player_speed = 10;
 		this.drop =  -100;
 		this.swim_speed = 4;
 		game.state.start('main');
@@ -156,6 +157,20 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	var gameCode = window.location.hash.substr(1, 6);
 	var socket = io.connect(server);
 	var button;
+	var y;
+	var controller = document.getElementById('cllr');
+	var ctx = controller.getContext('2d');
+	ctx.fillStyle = "white";
+	ctx.strokeStyle = "green";
+	ctx.lineWidth = "1";
+
+	ctx.fillRect(80, 100, 40, 150);
+	ctx.strokeRect(80, 100 ,40, 150);
+
+
+	ctx.fillRect(240, 100, 40, 150);
+	ctx.strokeRect(240, 100 ,40, 150);
+
 	// When server replies with initial welcome...
 	socket.on('welcome', function (data) {
 		// Send 'controller' device type with our entered game code
@@ -164,8 +179,34 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	// When game code is validated, we can begin playing...
 	socket.on("connected", function (data) {
 		$( "#press-me" ).bind( "tap", function( e ){
-			socket.emit("accelerate", {'accelerate': true});
+			socket.emit("accelerate", {'accelerate': 20});
 		});
+
+		controller.addEventListener("touchstart", function (event) {
+		}, false);
+		controller.addEventListener("touchmove", function (event) {
+			event.preventDefault();
+			var pt = getMouse(event, controller);
+
+			console.log( pt.x);
+			ctx.fillStyle = "red";
+			if(pt.x >=60 && pt.x <=140 && pt.y >= 100 && pt.y <= 250){
+				ctx.fillRect(80, 100, 40, pt.y-100);
+				y = pt.y;
+			}
+
+			if(pt.x >=220 && pt.x <=400 && pt.y >= 100 && pt.y <= 250){
+				ctx.fillRect(240, 100, 40, pt.y-100);
+				y = pt.y;
+			}
+
+		}, false);
+		controller.addEventListener("touchend", function (event) {
+			ctx.fillStyle = "white";
+			ctx.fillRect(80, 100, 40, 150);
+			ctx.fillRect(240, 100, 40, 150);
+			socket.emit("accelerate", {'accelerate': y/10});
+		}, false);
 
 		//button = document.getElementById("press-me");
 		//// Prevent touchmove event from cancelling the 'touchend' event above
@@ -200,7 +241,46 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(naviga
 	// When the phone is touched, accelerate the vehicle
 	socket.on("accelerate", function (accelerate) {
 		console.log(accelerate);
+		player_speed += accelerate;
 		$("#fake-btn").click();
 	});
 	var game = new Phaser.Game(window.innerWidth, window.innerHeight);
 }
+function getMouse(e, canvas) {
+	var html = document.body.parentNode,
+	htmlTop = html.offsetTop,
+	htmlLeft = html.offsetLeft;
+
+	var stylePaddingLeft = parseInt(document.defaultView.getComputedStyle(canvas, null)['paddingLeft'], 10) || 0;
+	var stylePaddingTop = parseInt(document.defaultView.getComputedStyle(canvas, null)['paddingTop'], 10) || 0;
+	var styleBorderLeft = parseInt(document.defaultView.getComputedStyle(canvas, null)['borderLeftWidth'], 10) || 0;
+	var styleBorderTop = parseInt(document.defaultView.getComputedStyle(canvas, null)['borderTopWidth'], 10) || 0;
+
+	var element = canvas,
+		offsetX = 0,
+		offsetY = 0,
+		mx, my;
+
+	// Compute the total offset. It's possible to cache this if you want
+	if (element.offsetParent !== undefined) {
+		do {
+			offsetX += element.offsetLeft;
+			offsetY += element.offsetTop;
+		} while ((element = element.offsetParent));
+	}
+
+	// Add padding and border style widths to offset
+	// Also add the <html> offsets in case there's a position:fixed bar (like the stumbleupon bar)
+	// This part is not strictly necessary, it depends on your styling
+	offsetX += stylePaddingLeft + styleBorderLeft + htmlLeft;
+	offsetY += stylePaddingTop + styleBorderTop + htmlTop;
+
+	mx = e.changedTouches[0].pageX - offsetX;
+	my = e.changedTouches[0].pageY - offsetY;
+
+	// We return a simple javascript object with x and y defined
+	return {
+		x: mx,
+		y: my
+	};
+};
